@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Honey's World</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #fff;
+      color: #333;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .hero {
+      text-align: center;
+      padding: 80px 20px;
+      background: #ffe4ec;
+    }
+
+    .hero h1 {
+      font-size: 40px;
+    }
+
+    .btn {
+      background: #ff4d88;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 40px;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .cart {
+      background: #f5f5f5;
+      padding: 30px;
+    }
+
+    footer {
+      background: black;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <h2>Honey's World</h2>
+    <p>Cart: <span id="cart-count">0</span></p>
+  </nav>
+
+  <section class="hero">
+    <h1>Welcome to Honey's World</h1>
+    <p>Trendy fashion at your fingertips</p>
+  </section>
+
+  <section class="products">
+    <div class="card">
+      <h3>Streetwear Set</h3>
+      <p>$50</p>
+      <button class="btn" onclick="addToCart(50)">Add to Cart</button>
+    </div>
+
+    <div class="card">
+      <h3>Luxury Fit</h3>
+      <p>$120</p>
+      <button class="btn" onclick="addToCart(120)">Add to Cart</button>
+    </div>
+
+    <div class="card">
+      <h3>Casual Wear</h3>
+      <p>$35</p>
+      <button class="btn" onclick="addToCart(35)">Add to Cart</button>
+    </div>
+  </section>
+
+  <section class="cart">
+    <h2>Cart Total: $<span id="total">0</span></h2>
+    <button class="btn" onclick="checkout()">Checkout</button>
+  </section>
+
+  <footer>
+    <p>© 2026 Honey's World</p>
+  </footer>
+
+  <script>
+    let total = 0;
+    let count = 0;
+
+    function addToCart(price) {
+      total += price;
+      count += 1;
+
+      document.getElementById("total").innerText = total;
+      document.getElementById("cart-count").innerText = count;
+    }
+
+    function checkout() {
+      alert("Next step: We will connect real payment (Stripe)");
+    }
+  </script>
+
+</body>
+</html>
