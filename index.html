@@ -1,128 +1,897 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Honey's World</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Honey's World | Traditional Wear in Nigeria</title>
 
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #fff;
-      color: #333;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    body {
+      background: #fff8f0;
+      color: #2b160d;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .top-bar {
+      background: #4b1f0f;
+      color: #fff;
+      padding: 10px 6%;
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      font-size: 14px;
+      flex-wrap: wrap;
+    }
+
+    header {
+      background: #fff8f0;
+      padding: 22px 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ead6c2;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo h1 {
+      font-size: 34px;
+      letter-spacing: 1px;
+    }
+
+    .logo p {
+      font-size: 12px;
+      letter-spacing: 4px;
+      color: #8b5a36;
+      text-transform: uppercase;
+      margin-top: 3px;
     }
 
     nav {
       display: flex;
-      justify-content: space-between;
-      padding: 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      gap: 25px;
+      align-items: center;
+      font-size: 14px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    nav button {
+      border: none;
+      background: #4b1f0f;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
     }
 
     .hero {
-      text-align: center;
-      padding: 80px 20px;
-      background: #ffe4ec;
+      min-height: 620px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 50px 6% 0;
+      align-items: center;
+      gap: 30px;
+      background: linear-gradient(120deg, #fff8f0 0%, #f1ddc8 100%);
     }
 
-    .hero h1 {
-      font-size: 40px;
+    .hero-text h2 {
+      font-size: clamp(46px, 6vw, 82px);
+      line-height: 0.95;
+      margin-bottom: 25px;
+    }
+
+    .hero-text p {
+      font-size: 19px;
+      line-height: 1.7;
+      color: #5f4433;
+      max-width: 520px;
+      margin-bottom: 30px;
     }
 
     .btn {
-      background: #ff4d88;
+      display: inline-block;
+      background: #4b1f0f;
       color: white;
-      padding: 12px 20px;
+      padding: 15px 28px;
+      border-radius: 5px;
+      font-weight: bold;
       border: none;
       cursor: pointer;
-      border-radius: 8px;
+    }
+
+    .btn.light {
+      background: #fff;
+      color: #4b1f0f;
+      border: 1px solid #4b1f0f;
+    }
+
+    .hero-image {
+      height: 560px;
+      border-radius: 28px 28px 0 0;
+      overflow: hidden;
+      box-shadow: 0 20px 45px rgba(75, 31, 15, 0.2);
+    }
+
+    .hero-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      padding: 35px 6%;
+      background: #fff;
+      border-bottom: 1px solid #ead6c2;
+    }
+
+    .feature {
+      display: flex;
+      gap: 13px;
+      align-items: flex-start;
+    }
+
+    .feature span {
+      font-size: 30px;
+    }
+
+    .feature h3 {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .feature p {
+      font-size: 14px;
+      color: #6c5647;
+      line-height: 1.5;
+    }
+
+    section {
+      padding: 70px 6%;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .section-title p {
+      color: #9b6a42;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .section-title h2 {
+      font-size: 42px;
+      margin-top: 10px;
+    }
+
+    .filters {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 35px;
+    }
+
+    .filters button {
+      padding: 12px 23px;
+      border: 1px solid #d9c2aa;
+      background: white;
+      color: #4b1f0f;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .filters button.active {
+      background: #4b1f0f;
+      color: white;
     }
 
     .products {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      padding: 40px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 25px;
     }
 
-    .card {
-      border: 1px solid #ddd;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(75, 31, 15, 0.08);
+      border: 1px solid #ead6c2;
     }
 
-    .cart {
-      background: #f5f5f5;
-      padding: 30px;
+    .product-card img {
+      width: 100%;
+      height: 330px;
+      object-fit: cover;
+      background: #ead6c2;
+    }
+
+    .product-info {
+      padding: 18px;
+    }
+
+    .product-info small {
+      color: #9b6a42;
+      font-weight: bold;
+    }
+
+    .product-info h3 {
+      font-size: 19px;
+      margin: 7px 0;
+    }
+
+    .price {
+      font-size: 19px;
+      font-weight: bold;
+      margin: 12px 0;
+    }
+
+    .status {
+      display: inline-block;
+      background: #f3e4d2;
+      color: #6b361d;
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .product-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .product-actions button {
+      flex: 1;
+      padding: 11px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 5px;
+    }
+
+    .order-btn {
+      background: #4b1f0f;
+      color: white;
+    }
+
+    .view-btn {
+      background: #f3e4d2;
+      color: #4b1f0f;
+    }
+
+    .about {
+      background: #4b1f0f;
+      color: white;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 45px;
+      align-items: center;
+    }
+
+    .about img {
+      width: 100%;
+      height: 480px;
+      object-fit: cover;
+      border-radius: 22px;
+    }
+
+    .about h2 {
+      font-size: 46px;
+      margin-bottom: 18px;
+    }
+
+    .about p {
+      color: #f0d8c0;
+      line-height: 1.8;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    .report-section {
+      background: #fff;
+    }
+
+    .report-box {
+      max-width: 700px;
+      margin: auto;
+      background: #fff8f0;
+      padding: 35px;
+      border-radius: 18px;
+      border: 1px solid #ead6c2;
+      box-shadow: 0 10px 30px rgba(75, 31, 15, 0.08);
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 14px;
+      border: 1px solid #d9c2aa;
+      border-radius: 7px;
+      background: white;
+      outline: none;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
     }
 
     footer {
-      background: black;
+      background: #2b160d;
       color: white;
+      padding: 35px 6%;
       text-align: center;
+    }
+
+    footer p {
+      color: #d8b99e;
+      margin-top: 8px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 100;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .modal.active {
+      display: block;
+    }
+
+    .modal-content {
+      background: white;
+      max-width: 1000px;
+      margin: auto;
+      border-radius: 16px;
+      padding: 30px;
+      position: relative;
+    }
+
+    .close {
+      position: absolute;
+      right: 20px;
+      top: 15px;
+      font-size: 28px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 25px;
+      margin-top: 20px;
+    }
+
+    .admin-card {
+      background: #fff8f0;
+      border: 1px solid #ead6c2;
+      border-radius: 12px;
       padding: 20px;
+    }
+
+    .admin-product {
+      display: grid;
+      grid-template-columns: 70px 1fr 120px;
+      gap: 12px;
+      align-items: center;
+      background: white;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      border: 1px solid #ead6c2;
+    }
+
+    .admin-product img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .admin-product input {
+      margin: 0;
+    }
+
+    .product-modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      align-items: center;
+    }
+
+    .product-modal-grid img {
+      width: 100%;
+      height: 520px;
+      object-fit: cover;
+      border-radius: 16px;
+    }
+
+    @media (max-width: 950px) {
+      header {
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      nav {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .hero,
+      .about,
+      .admin-grid,
+      .product-modal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-image {
+        height: 430px;
+      }
+
+      .features,
+      .products {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .top-bar {
+        font-size: 12px;
+      }
+
+      .logo h1 {
+        font-size: 28px;
+      }
+
+      nav {
+        gap: 12px;
+        font-size: 12px;
+      }
+
+      .hero {
+        padding-top: 35px;
+      }
+
+      .hero-text h2 {
+        font-size: 48px;
+      }
+
+      .features,
+      .products {
+        grid-template-columns: 1fr;
+      }
+
+      .product-card img {
+        height: 400px;
+      }
+
+      .section-title h2 {
+        font-size: 33px;
+      }
+
+      .admin-product {
+        grid-template-columns: 60px 1fr;
+      }
+
+      .admin-product input {
+        grid-column: 1 / -1;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <nav>
-    <h2>Honey's World</h2>
-    <p>Cart: <span id="cart-count">0</span></p>
-  </nav>
+  <div class="top-bar">
+    <div>Welcome to Honey’s World — Tradition in every thread</div>
+    <div>🇳🇬 Made in Nigeria | Nationwide Delivery | WhatsApp Orders</div>
+  </div>
 
-  <section class="hero">
-    <h1>Welcome to Honey's World</h1>
-    <p>Trendy fashion at your fingertips</p>
-  </section>
-
-  <section class="products">
-    <div class="card">
-      <h3>Streetwear Set</h3>
-      <p>$50</p>
-      <button class="btn" onclick="addToCart(50)">Add to Cart</button>
+  <header>
+    <div class="logo">
+      <h1>Honey’s World</h1>
+      <p>Tradition In Every Thread</p>
     </div>
 
-    <div class="card">
-      <h3>Luxury Fit</h3>
-      <p>$120</p>
-      <button class="btn" onclick="addToCart(120)">Add to Cart</button>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#shop">Shop</a>
+      <a href="#about">About</a>
+      <a href="#report">Report</a>
+      <button onclick="openAdmin()">Owner Login</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-text">
+        <h2>Celebrate Your Heritage In Style</h2>
+        <p>
+          Premium Adire, Kampala, Boubou, Kaftans, and custom traditional wear
+          designed for elegance, comfort, and confidence.
+        </p>
+        <a class="btn" href="#shop">Shop Collection</a>
+        <a class="btn light" href="#report">Send Enquiry</a>
+      </div>
+
+      <div class="hero-image">
+        <img src="https://images.unsplash.com/photo-1619334911925-46a94b7ce185?q=80&w=1200&auto=format&fit=crop" alt="Honey's World traditional wear">
+      </div>
+    </section>
+
+    <div class="features">
+      <div class="feature">
+        <span>🛡️</span>
+        <div>
+          <h3>Quality You Can Trust</h3>
+          <p>Carefully selected fabrics and neat finishing.</p>
+        </div>
+      </div>
+
+      <div class="feature">
+        <span>🚚</span>
+        <div>
+          <h3>Nationwide Delivery</h3>
+          <p>Delivery available across Nigeria.</p>
+        </div>
+      </div>
+
+      <div class="feature">
+        <span>💬</span>
+        <div>
+          <h3>WhatsApp Orders</h3>
+          <p>Customers can order directly through WhatsApp.</p>
+        </div>
+      </div>
+
+      <div class="feature">
+        <span>✨</span>
+        <div>
+          <h3>Custom Styles</h3>
+          <p>Traditional outfits made for different occasions.</p>
+        </div>
+      </div>
     </div>
 
-    <div class="card">
-      <h3>Casual Wear</h3>
-      <p>$35</p>
-      <button class="btn" onclick="addToCart(35)">Add to Cart</button>
-    </div>
-  </section>
+    <section id="shop">
+      <div class="section-title">
+        <p>Our Collection</p>
+        <h2>Shop Honey’s World</h2>
+      </div>
 
-  <section class="cart">
-    <h2>Cart Total: $<span id="total">0</span></h2>
-    <button class="btn" onclick="checkout()">Checkout</button>
-  </section>
+      <div class="filters">
+        <button class="active" onclick="filterProducts('All', this)">All</button>
+        <button onclick="filterProducts('Adire', this)">Adire</button>
+        <button onclick="filterProducts('Boubou', this)">Boubou</button>
+        <button onclick="filterProducts('Kaftan', this)">Kaftan</button>
+        <button onclick="filterProducts('Custom', this)">Custom</button>
+      </div>
+
+      <div class="products" id="productList"></div>
+    </section>
+
+    <section class="about" id="about">
+      <img src="https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=1200&auto=format&fit=crop" alt="African fashion">
+
+      <div>
+        <h2>About Honey’s World</h2>
+        <p>
+          Honey’s World is a Nigerian fashion brand focused on beautiful traditional wear,
+          Adire styles, Kampala designs, Boubou, Kaftans, and elegant custom pieces.
+        </p>
+        <p>
+          Our goal is to make every customer feel confident, stylish, and connected to culture
+          through quality fashion.
+        </p>
+        <a class="btn light" href="#shop">View Products</a>
+      </div>
+    </section>
+
+    <section class="report-section" id="report">
+      <div class="section-title">
+        <p>Customer Care</p>
+        <h2>Send A Message / Report</h2>
+      </div>
+
+      <div class="report-box">
+        <input id="customerName" type="text" placeholder="Your Name">
+        <input id="customerPhone" type="text" placeholder="Phone Number">
+        <input id="customerEmail" type="email" placeholder="Email Address">
+        <textarea id="customerMessage" placeholder="Type your enquiry, complaint, size request, or delivery report..."></textarea>
+        <button class="btn" onclick="sendReport()">Submit Through WhatsApp</button>
+      </div>
+    </section>
+  </main>
 
   <footer>
-    <p>© 2026 Honey's World</p>
+    <h2>Honey’s World</h2>
+    <p>Traditional wear, Adire, Kampala, Boubou, and custom fashion in Nigeria.</p>
+    <p>© 2026 Honey’s World. All rights reserved.</p>
   </footer>
 
+  <div class="modal" id="productModal">
+    <div class="modal-content">
+      <span class="close" onclick="closeProductModal()">&times;</span>
+      <div id="productDetails"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="adminModal">
+    <div class="modal-content">
+      <span class="close" onclick="closeAdmin()">&times;</span>
+      <h2>Owner Dashboard</h2>
+      <p style="margin-top: 8px; color:#6c5647;">
+        Demo password: <b>honey123</b>. This is the first version. Later, Supabase will make this secure and real.
+      </p>
+
+      <div id="loginBox" style="margin-top:20px;">
+        <input id="adminPassword" type="password" placeholder="Enter owner password">
+        <button class="btn" onclick="loginAdmin()">Login</button>
+      </div>
+
+      <div id="dashboard" style="display:none;">
+        <div class="admin-grid">
+          <div class="admin-card">
+            <h3>Add New Product</h3>
+            <br>
+            <input id="newName" type="text" placeholder="Product name">
+            <input id="newCategory" type="text" placeholder="Category e.g. Adire">
+            <input id="newPrice" type="number" placeholder="Price e.g. 25000">
+            <input id="newStatus" type="text" placeholder="Status e.g. Available">
+            <input id="newImage" type="text" placeholder="Image URL">
+            <textarea id="newDescription" placeholder="Product description"></textarea>
+            <button class="btn" onclick="addProduct()">Add Product</button>
+          </div>
+
+          <div class="admin-card">
+            <h3>Change Product Prices</h3>
+            <br>
+            <div id="adminProducts"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    let total = 0;
-    let count = 0;
+    const WHATSAPP_NUMBER = "234XXXXXXXXXX";
 
-    function addToCart(price) {
-      total += price;
-      count += 1;
+    let products = JSON.parse(localStorage.getItem("honeysProducts")) || [
+      {
+        name: "Indigo Adire Maxi Dress",
+        category: "Adire",
+        price: 25000,
+        status: "Available",
+        image: "https://images.unsplash.com/photo-1619334911925-46a94b7ce185?q=80&w=900&auto=format&fit=crop",
+        description: "Elegant hand-dyed Adire maxi dress perfect for events, church, outings, and special occasions."
+      },
+      {
+        name: "Men’s Adire Senator Wear",
+        category: "Adire",
+        price: 28000,
+        status: "Available",
+        image: "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?q=80&w=900&auto=format&fit=crop",
+        description: "Stylish senator wear with traditional pattern and comfortable fitting."
+      },
+      {
+        name: "Purple Adire Kaftan",
+        category: "Kaftan",
+        price: 22000,
+        status: "Limited Stock",
+        image: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=900&auto=format&fit=crop",
+        description: "Beautiful kaftan made with soft fabric and elegant finishing."
+      },
+      {
+        name: "Brown Boubou",
+        category: "Boubou",
+        price: 24000,
+        status: "Available",
+        image: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=900&auto=format&fit=crop",
+        description: "Comfortable traditional boubou for stylish everyday and occasion wear."
+      }
+    ];
 
-      document.getElementById("total").innerText = total;
-      document.getElementById("cart-count").innerText = count;
+    function saveProducts() {
+      localStorage.setItem("honeysProducts", JSON.stringify(products));
     }
 
-    function checkout() {
-      alert("Next step: We will connect real payment (Stripe)");
+    function formatPrice(price) {
+      return "₦" + Number(price).toLocaleString("en-NG");
     }
+
+    function renderProducts(category = "All") {
+      const productList = document.getElementById("productList");
+      productList.innerHTML = "";
+
+      const filtered = category === "All"
+        ? products
+        : products.filter(product => product.category.toLowerCase() === category.toLowerCase());
+
+      filtered.forEach((product, index) => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+
+        card.innerHTML = `
+          <img src="${product.image}" alt="${product.name}">
+          <div class="product-info">
+            <small>${product.category}</small>
+            <h3>${product.name}</h3>
+            <div class="status">${product.status}</div>
+            <div class="price">${formatPrice(product.price)}</div>
+            <div class="product-actions">
+              <button class="view-btn" onclick="viewProduct(${products.indexOf(product)})">View</button>
+              <button class="order-btn" onclick="orderProduct(${products.indexOf(product)})">WhatsApp Order</button>
+            </div>
+          </div>
+        `;
+
+        productList.appendChild(card);
+      });
+    }
+
+    function filterProducts(category, button) {
+      document.querySelectorAll(".filters button").forEach(btn => btn.classList.remove("active"));
+      button.classList.add("active");
+      renderProducts(category);
+    }
+
+    function viewProduct(index) {
+      const product = products[index];
+      document.getElementById("productDetails").innerHTML = `
+        <div class="product-modal-grid">
+          <img src="${product.image}" alt="${product.name}">
+          <div>
+            <small style="color:#9b6a42; font-weight:bold;">${product.category}</small>
+            <h2 style="font-size:38px; margin:10px 0;">${product.name}</h2>
+            <h3 style="font-size:26px; margin-bottom:15px;">${formatPrice(product.price)}</h3>
+            <p style="line-height:1.8; color:#5f4433; margin-bottom:18px;">${product.description}</p>
+            <p><b>Status:</b> ${product.status}</p>
+            <br>
+            <button class="btn" onclick="orderProduct(${index})">Order On WhatsApp</button>
+          </div>
+        </div>
+      `;
+      document.getElementById("productModal").classList.add("active");
+    }
+
+    function closeProductModal() {
+      document.getElementById("productModal").classList.remove("active");
+    }
+
+    function orderProduct(index) {
+      const product = products[index];
+
+      const message = `Hello Honey's World, I want to order this product:%0A%0AProduct: ${product.name}%0APrice: ${formatPrice(product.price)}%0ACategory: ${product.category}%0A%0APlease is it available?`;
+
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
+    }
+
+    function sendReport() {
+      const name = document.getElementById("customerName").value;
+      const phone = document.getElementById("customerPhone").value;
+      const email = document.getElementById("customerEmail").value;
+      const message = document.getElementById("customerMessage").value;
+
+      if (!name || !message) {
+        alert("Please enter your name and message.");
+        return;
+      }
+
+      const whatsappMessage = `Customer Report / Enquiry:%0A%0AName: ${name}%0APhone: ${phone}%0AEmail: ${email}%0A%0AMessage:%0A${message}`;
+
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`, "_blank");
+    }
+
+    function openAdmin() {
+      document.getElementById("adminModal").classList.add("active");
+    }
+
+    function closeAdmin() {
+      document.getElementById("adminModal").classList.remove("active");
+    }
+
+    function loginAdmin() {
+      const password = document.getElementById("adminPassword").value;
+
+      if (password === "honey123") {
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        renderAdminProducts();
+      } else {
+        alert("Wrong password.");
+      }
+    }
+
+    function addProduct() {
+      const product = {
+        name: document.getElementById("newName").value,
+        category: document.getElementById("newCategory").value || "Traditional Wear",
+        price: document.getElementById("newPrice").value,
+        status: document.getElementById("newStatus").value || "Available",
+        image: document.getElementById("newImage").value || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=900&auto=format&fit=crop",
+        description: document.getElementById("newDescription").value || "Beautiful traditional wear from Honey's World."
+      };
+
+      if (!product.name || !product.price) {
+        alert("Please add product name and price.");
+        return;
+      }
+
+      products.unshift(product);
+      saveProducts();
+      renderProducts();
+      renderAdminProducts();
+
+      document.getElementById("newName").value = "";
+      document.getElementById("newCategory").value = "";
+      document.getElementById("newPrice").value = "";
+      document.getElementById("newStatus").value = "";
+      document.getElementById("newImage").value = "";
+      document.getElementById("newDescription").value = "";
+
+      alert("Product added.");
+    }
+
+    function renderAdminProducts() {
+      const adminProducts = document.getElementById("adminProducts");
+      adminProducts.innerHTML = "";
+
+      products.forEach((product, index) => {
+        const row = document.createElement("div");
+        row.className = "admin-product";
+
+        row.innerHTML = `
+          <img src="${product.image}" alt="${product.name}">
+          <div>
+            <b>${product.name}</b>
+            <p style="color:#6c5647; margin-top:4px;">${product.category}</p>
+          </div>
+          <input type="number" value="${product.price}" onchange="updatePrice(${index}, this.value)">
+        `;
+
+        adminProducts.appendChild(row);
+      });
+    }
+
+    function updatePrice(index, newPrice) {
+      products[index].price = newPrice;
+      saveProducts();
+      renderProducts();
+      alert("Price updated.");
+    }
+
+    renderProducts();
   </script>
 
 </body>
