@@ -454,13 +454,13 @@
 
     .admin-product {
       display: grid;
-      grid-template-columns: 70px 1fr 120px 120px 80px;
+      grid-template-columns: 70px 1fr 110px 135px 80px;
       gap: 12px;
       align-items: center;
       background: white;
       padding: 12px;
       border-radius: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       border: 1px solid #ead6c2;
     }
 
@@ -475,6 +475,27 @@
     .admin-product select {
       margin: 0;
       padding: 10px;
+    }
+
+    .image-url-box {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 130px;
+      gap: 10px;
+    }
+
+    .image-url-box input {
+      margin: 0;
+    }
+
+    .image-url-box button {
+      background: #4b1f0f;
+      color: white;
+      border: none;
+      padding: 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
     }
 
     .delete-btn {
@@ -588,8 +609,13 @@
 
       .admin-product input,
       .admin-product select,
-      .admin-product button {
+      .admin-product button,
+      .image-url-box {
         grid-column: 1 / -1;
+      }
+
+      .image-url-box {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -785,6 +811,7 @@
             <br>
 
             <input id="newName" type="text" placeholder="Product name">
+
             <select id="newCategory">
               <option value="Adire">Adire</option>
               <option value="Boubou">Boubou</option>
@@ -792,6 +819,7 @@
               <option value="Kampala">Kampala</option>
               <option value="Custom">Custom</option>
             </select>
+
             <input id="newPrice" type="number" placeholder="Price e.g. 25000">
 
             <select id="newStatus">
@@ -809,6 +837,9 @@
 
           <div class="admin-card">
             <h3>Manage Products</h3>
+            <p style="color:#6c5647; margin-top:6px; line-height:1.6;">
+              You can change price, status, image URL, or delete a product.
+            </p>
             <br>
             <div id="adminProducts"></div>
           </div>
@@ -1139,6 +1170,11 @@
           </select>
 
           <button class="delete-btn" onclick="deleteProduct(${index})">Delete</button>
+
+          <div class="image-url-box">
+            <input id="imageInput${index}" type="text" value="${product.image}" placeholder="Paste new image URL here">
+            <button onclick="updateImage(${index})">Change Image</button>
+          </div>
         `;
 
         adminProducts.appendChild(row);
@@ -1163,6 +1199,24 @@
       applyShopFilters();
 
       alert("Status updated.");
+    }
+
+    function updateImage(index) {
+      const newImage = document.getElementById("imageInput" + index).value;
+
+      if (!newImage) {
+        alert("Please paste an image URL.");
+        return;
+      }
+
+      products[index].image = newImage;
+      saveProducts();
+
+      renderFeaturedProducts();
+      applyShopFilters();
+      renderAdminProducts();
+
+      alert("Image updated.");
     }
 
     function deleteProduct(index) {
