@@ -6,6 +6,8 @@
 
   <title>Honey's World | Traditional Wear in Nigeria</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     * {
       margin: 0;
@@ -408,7 +410,7 @@
 
     .modal-content {
       background: white;
-      max-width: 1050px;
+      max-width: 1100px;
       margin: auto;
       border-radius: 16px;
       padding: 30px;
@@ -453,15 +455,19 @@
     }
 
     .admin-product {
-      display: grid;
-      grid-template-columns: 70px 1fr 110px 135px 80px;
-      gap: 12px;
-      align-items: center;
       background: white;
-      padding: 12px;
+      padding: 14px;
       border-radius: 10px;
       margin-bottom: 14px;
       border: 1px solid #ead6c2;
+    }
+
+    .admin-product-top {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
     }
 
     .admin-product img {
@@ -472,27 +478,23 @@
     }
 
     .admin-product input,
-    .admin-product select {
-      margin: 0;
+    .admin-product select,
+    .admin-product textarea {
+      margin-bottom: 10px;
       padding: 10px;
     }
 
-    .image-url-box {
-      grid-column: 1 / -1;
-      display: grid;
-      grid-template-columns: 1fr 130px;
+    .admin-actions {
+      display: flex;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
-    .image-url-box input {
-      margin: 0;
-    }
-
-    .image-url-box button {
+    .save-btn {
       background: #4b1f0f;
       color: white;
       border: none;
-      padding: 11px;
+      padding: 11px 15px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
@@ -502,24 +504,50 @@
       background: #8b1e1e;
       color: white;
       border: none;
-      padding: 11px;
+      padding: 11px 15px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
     }
 
+    .logout-btn {
+      background: #8b1e1e;
+      color: white;
+      border: none;
+      padding: 11px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 12px;
+    }
+
+    .report-item {
+      background: white;
+      border: 1px solid #ead6c2;
+      padding: 14px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+
+    .report-item p {
+      line-height: 1.6;
+      color: #5f4433;
+    }
+
+    .loading-message,
+    .empty-message {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 35px;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #ead6c2;
+      color: #6c5647;
+    }
+
     @media (max-width: 1050px) {
       .products {
         grid-template-columns: repeat(3, 1fr);
-      }
-
-      .admin-product {
-        grid-template-columns: 70px 1fr 120px;
-      }
-
-      .admin-product select,
-      .admin-product button {
-        grid-column: span 1;
       }
     }
 
@@ -601,21 +629,6 @@
       .report-box,
       .modal-content {
         padding: 22px;
-      }
-
-      .admin-product {
-        grid-template-columns: 60px 1fr;
-      }
-
-      .admin-product input,
-      .admin-product select,
-      .admin-product button,
-      .image-url-box {
-        grid-column: 1 / -1;
-      }
-
-      .image-url-box {
-        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -702,12 +715,13 @@
         <p>Featured Collection</p>
         <h2>Popular Styles</h2>
         <p class="subtitle">
-          The homepage shows only a few products first so the website stays fast.
-          Customers can click “View All Products” to see the full collection.
+          Featured styles from Honey’s World. Click “View All Products” to see the full collection.
         </p>
       </div>
 
-      <div class="products" id="featuredProducts"></div>
+      <div class="products" id="featuredProducts">
+        <div class="loading-message">Loading products...</div>
+      </div>
 
       <div class="center-button">
         <button class="btn" onclick="showFullShop()">View All Products</button>
@@ -719,7 +733,7 @@
         <p>Full Collection</p>
         <h2>All Honey’s World Products</h2>
         <p class="subtitle">
-          Search and filter products. Only some products load first, then customers can click Load More.
+          Search and filter products. More products can be loaded using the Load More button.
         </p>
       </div>
 
@@ -771,7 +785,7 @@
         <input id="customerPhone" type="text" placeholder="Phone Number">
         <input id="customerEmail" type="email" placeholder="Email Address">
         <textarea id="customerMessage" placeholder="Type your enquiry, complaint, size request, or delivery report..."></textarea>
-        <button class="btn" onclick="sendReport()">Submit Through WhatsApp</button>
+        <button class="btn" onclick="sendReport()">Submit Report</button>
       </div>
     </section>
   </main>
@@ -795,16 +809,19 @@
 
       <h2>Owner Dashboard</h2>
       <p style="margin-top: 8px; color:#6c5647; line-height:1.6;">
-        Demo password: <b>honey123</b>. This first version saves products on the same browser.
-        Later, Supabase will make it permanent for everyone.
+        Login with the owner email and password you created in Supabase.
       </p>
 
       <div id="loginBox" style="margin-top:20px;">
-        <input id="adminPassword" type="password" placeholder="Enter owner password">
+        <input id="adminEmail" type="email" value="afolabiakinfaderin@gmail.com" placeholder="Owner email">
+        <input id="adminPassword" type="password" placeholder="Owner password">
         <button class="btn" onclick="loginAdmin()">Login</button>
       </div>
 
       <div id="dashboard" style="display:none;">
+        <p id="loggedInText" style="color:#6c5647; margin-top:10px;"></p>
+        <button class="logout-btn" onclick="logoutAdmin()">Logout</button>
+
         <div class="admin-grid">
           <div class="admin-card">
             <h3>Add New Product</h3>
@@ -832,119 +849,110 @@
             <input id="newImage" type="text" placeholder="Image URL">
             <textarea id="newDescription" placeholder="Product description"></textarea>
 
+            <select id="newFeatured">
+              <option value="false">Not Featured</option>
+              <option value="true">Featured on Homepage</option>
+            </select>
+
             <button class="btn" onclick="addProduct()">Add Product</button>
           </div>
 
           <div class="admin-card">
             <h3>Manage Products</h3>
             <p style="color:#6c5647; margin-top:6px; line-height:1.6;">
-              You can change price, status, image URL, or delete a product.
+              Change price, status, image URL, featured status, or delete a product.
             </p>
             <br>
             <div id="adminProducts"></div>
           </div>
+        </div>
+
+        <div class="admin-card" style="margin-top:25px;">
+          <h3>Customer Reports</h3>
+          <p style="color:#6c5647; margin-top:6px;">
+            Recent reports and enquiries submitted by customers.
+          </p>
+          <br>
+          <div id="adminReports"></div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
+    const SUPABASE_URL = "https://zdhoogixvcvqwrvhsfnz.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_ZO77J5K4HByd6fiP8jTw1A_thIt4LeD";
     const WHATSAPP_NUMBER = "2348118474905";
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     const FEATURED_LIMIT = 4;
     const SHOP_PAGE_SIZE = 8;
 
+    let products = [];
+    let reports = [];
     let visibleProductCount = SHOP_PAGE_SIZE;
     let currentFilteredProducts = [];
+    let currentUser = null;
 
-    let products = JSON.parse(localStorage.getItem("honeysProducts")) || [
-      {
-        name: "Indigo Adire Maxi Dress",
-        category: "Adire",
-        price: 25000,
-        status: "Available",
-        image: "https://images.unsplash.com/photo-1619334911925-46a94b7ce185?q=80&w=900&auto=format&fit=crop",
-        description: "Elegant Adire maxi dress perfect for events, church, outings, and special occasions."
-      },
-      {
-        name: "Men’s Adire Senator Wear",
-        category: "Adire",
-        price: 28000,
-        status: "Available",
-        image: "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?q=80&w=900&auto=format&fit=crop",
-        description: "Stylish senator wear with traditional pattern and comfortable fitting."
-      },
-      {
-        name: "Purple Adire Kaftan",
-        category: "Kaftan",
-        price: 22000,
-        status: "Limited Stock",
-        image: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=900&auto=format&fit=crop",
-        description: "Beautiful kaftan made with soft fabric and elegant finishing."
-      },
-      {
-        name: "Brown Boubou",
-        category: "Boubou",
-        price: 24000,
-        status: "Available",
-        image: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=900&auto=format&fit=crop",
-        description: "Comfortable traditional boubou for stylish everyday and occasion wear."
-      },
-      {
-        name: "Kampala Two Piece",
-        category: "Kampala",
-        price: 30000,
-        status: "Available",
-        image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=900&auto=format&fit=crop",
-        description: "Elegant two-piece Kampala outfit for classy traditional styling."
-      },
-      {
-        name: "Custom Event Outfit",
-        category: "Custom",
-        price: 45000,
-        status: "Custom Order",
-        image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=900&auto=format&fit=crop",
-        description: "Custom outfit made specially for birthdays, weddings, and special occasions."
-      },
-      {
-        name: "Royal Boubou Gown",
-        category: "Boubou",
-        price: 35000,
-        status: "Available",
-        image: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=900&auto=format&fit=crop",
-        description: "A stylish boubou gown with a royal and comfortable look."
-      },
-      {
-        name: "Classic Adire Set",
-        category: "Adire",
-        price: 32000,
-        status: "Limited Stock",
-        image: "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?q=80&w=900&auto=format&fit=crop",
-        description: "Classic Adire set for customers who love cultural elegance."
-      }
-    ];
-
-    function saveProducts() {
-      localStorage.setItem("honeysProducts", JSON.stringify(products));
+    function escapeHTML(value) {
+      if (value === null || value === undefined) return "";
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
     function formatPrice(price) {
-      return "₦" + Number(price).toLocaleString("en-NG");
+      return "₦" + Number(price || 0).toLocaleString("en-NG");
     }
 
-    function createProductCard(product, index) {
+    function getImage(product) {
+      return product.image_url || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=900&auto=format&fit=crop";
+    }
+
+    async function loadProducts() {
+      const { data, error } = await supabaseClient
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error(error);
+        document.getElementById("featuredProducts").innerHTML = `
+          <div class="empty-message">
+            Could not load products. Please check Supabase connection.
+          </div>
+        `;
+        return;
+      }
+
+      products = data || [];
+      currentFilteredProducts = products;
+
+      renderFeaturedProducts();
+
+      if (document.getElementById("fullShop").style.display === "block") {
+        applyShopFilters();
+      }
+    }
+
+    function createProductCard(product) {
       const card = document.createElement("div");
       card.className = "product-card";
 
       card.innerHTML = `
-        <img src="${product.image}" alt="${product.name}" onclick="viewProduct(${index})">
+        <img src="${escapeHTML(getImage(product))}" alt="${escapeHTML(product.name)}" onclick="viewProduct('${product.id}')">
         <div class="product-info">
-          <small>${product.category}</small>
-          <h3>${product.name}</h3>
-          <div class="status">${product.status}</div>
+          <small>${escapeHTML(product.category)}</small>
+          <h3>${escapeHTML(product.name)}</h3>
+          <div class="status">${escapeHTML(product.status)}</div>
           <div class="price">${formatPrice(product.price)}</div>
           <div class="product-actions">
-            <button class="view-btn" onclick="viewProduct(${index})">View</button>
-            <button class="order-btn" onclick="orderProduct(${index})">WhatsApp Order</button>
+            <button class="view-btn" onclick="viewProduct('${product.id}')">View</button>
+            <button class="order-btn" onclick="orderProduct('${product.id}')">WhatsApp Order</button>
           </div>
         </div>
       `;
@@ -956,11 +964,23 @@
       const featuredProducts = document.getElementById("featuredProducts");
       featuredProducts.innerHTML = "";
 
-      const featured = products.slice(0, FEATURED_LIMIT);
+      if (products.length === 0) {
+        featuredProducts.innerHTML = `
+          <div class="empty-message">
+            No products yet. Login as owner and add products.
+          </div>
+        `;
+        return;
+      }
+
+      let featured = products.filter(product => product.is_featured).slice(0, FEATURED_LIMIT);
+
+      if (featured.length === 0) {
+        featured = products.slice(0, FEATURED_LIMIT);
+      }
 
       featured.forEach((product) => {
-        const realIndex = products.indexOf(product);
-        featuredProducts.appendChild(createProductCard(product, realIndex));
+        featuredProducts.appendChild(createProductCard(product));
       });
     }
 
@@ -981,9 +1001,9 @@
 
       currentFilteredProducts = products.filter((product) => {
         const matchesSearch =
-          product.name.toLowerCase().includes(searchValue) ||
-          product.category.toLowerCase().includes(searchValue) ||
-          product.description.toLowerCase().includes(searchValue);
+          String(product.name || "").toLowerCase().includes(searchValue) ||
+          String(product.category || "").toLowerCase().includes(searchValue) ||
+          String(product.description || "").toLowerCase().includes(searchValue);
 
         const matchesCategory =
           categoryValue === "All" || product.category === categoryValue;
@@ -1003,8 +1023,7 @@
       const productsToShow = currentFilteredProducts.slice(0, visibleProductCount);
 
       productsToShow.forEach((product) => {
-        const realIndex = products.indexOf(product);
-        allProducts.appendChild(createProductCard(product, realIndex));
+        allProducts.appendChild(createProductCard(product));
       });
 
       if (visibleProductCount >= currentFilteredProducts.length) {
@@ -1015,9 +1034,9 @@
 
       if (currentFilteredProducts.length === 0) {
         allProducts.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align:center; padding:35px; background:#fff8f0; border-radius:12px;">
+          <div class="empty-message">
             <h3>No products found</h3>
-            <p style="margin-top:8px; color:#6c5647;">Try another search or category.</p>
+            <p style="margin-top:8px;">Try another search or category.</p>
           </div>
         `;
       }
@@ -1028,26 +1047,31 @@
       renderAllProducts();
     }
 
-    function viewProduct(index) {
-      const product = products[index];
+    function findProduct(productId) {
+      return products.find(product => product.id === productId);
+    }
+
+    function viewProduct(productId) {
+      const product = findProduct(productId);
+      if (!product) return;
 
       document.getElementById("productDetails").innerHTML = `
         <div class="product-modal-grid">
-          <img src="${product.image}" alt="${product.name}">
+          <img src="${escapeHTML(getImage(product))}" alt="${escapeHTML(product.name)}">
 
           <div>
-            <small style="color:#9b6a42; font-weight:bold;">${product.category}</small>
-            <h2 style="font-size:38px; margin:10px 0;">${product.name}</h2>
+            <small style="color:#9b6a42; font-weight:bold;">${escapeHTML(product.category)}</small>
+            <h2 style="font-size:38px; margin:10px 0;">${escapeHTML(product.name)}</h2>
             <h3 style="font-size:26px; margin-bottom:15px;">${formatPrice(product.price)}</h3>
 
             <p style="line-height:1.8; color:#5f4433; margin-bottom:18px;">
-              ${product.description}
+              ${escapeHTML(product.description)}
             </p>
 
-            <p><b>Status:</b> ${product.status}</p>
+            <p><b>Status:</b> ${escapeHTML(product.status)}</p>
             <br>
 
-            <button class="btn" onclick="orderProduct(${index})">Order On WhatsApp</button>
+            <button class="btn" onclick="orderProduct('${product.id}')">Order On WhatsApp</button>
           </div>
         </div>
       `;
@@ -1059,69 +1083,139 @@
       document.getElementById("productModal").classList.remove("active");
     }
 
-    function orderProduct(index) {
-      const product = products[index];
+    function orderProduct(productId) {
+      const product = findProduct(productId);
+      if (!product) return;
 
       const message =
         `Hello Honey's World, I want to order this product:%0A%0A` +
-        `Product: ${product.name}%0A` +
-        `Price: ${formatPrice(product.price)}%0A` +
-        `Category: ${product.category}%0A` +
-        `Status: ${product.status}%0A%0A` +
+        `Product: ${encodeURIComponent(product.name)}%0A` +
+        `Price: ${encodeURIComponent(formatPrice(product.price))}%0A` +
+        `Category: ${encodeURIComponent(product.category)}%0A` +
+        `Status: ${encodeURIComponent(product.status)}%0A%0A` +
         `Please is it available?`;
 
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
     }
 
-    function sendReport() {
-      const name = document.getElementById("customerName").value;
-      const phone = document.getElementById("customerPhone").value;
-      const email = document.getElementById("customerEmail").value;
-      const message = document.getElementById("customerMessage").value;
+    async function sendReport() {
+      const name = document.getElementById("customerName").value.trim();
+      const phone = document.getElementById("customerPhone").value.trim();
+      const email = document.getElementById("customerEmail").value.trim();
+      const message = document.getElementById("customerMessage").value.trim();
 
       if (!name || !message) {
         alert("Please enter your name and message.");
         return;
       }
 
+      const { error } = await supabaseClient
+        .from("customer_reports")
+        .insert([
+          {
+            customer_name: name,
+            customer_phone: phone,
+            customer_email: email,
+            message: message,
+            status: "New"
+          }
+        ]);
+
+      if (error) {
+        console.error(error);
+        alert("Report could not be submitted. Please try again.");
+        return;
+      }
+
       const whatsappMessage =
         `Customer Report / Enquiry:%0A%0A` +
-        `Name: ${name}%0A` +
-        `Phone: ${phone}%0A` +
-        `Email: ${email}%0A%0A` +
-        `Message:%0A${message}`;
+        `Name: ${encodeURIComponent(name)}%0A` +
+        `Phone: ${encodeURIComponent(phone)}%0A` +
+        `Email: ${encodeURIComponent(email)}%0A%0A` +
+        `Message:%0A${encodeURIComponent(message)}`;
 
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`, "_blank");
+
+      document.getElementById("customerName").value = "";
+      document.getElementById("customerPhone").value = "";
+      document.getElementById("customerEmail").value = "";
+      document.getElementById("customerMessage").value = "";
+
+      alert("Report submitted successfully.");
     }
 
     function openAdmin() {
       document.getElementById("adminModal").classList.add("active");
+      checkSession();
     }
 
     function closeAdmin() {
       document.getElementById("adminModal").classList.remove("active");
     }
 
-    function loginAdmin() {
-      const password = document.getElementById("adminPassword").value;
+    async function checkSession() {
+      const { data } = await supabaseClient.auth.getSession();
 
-      if (password === "honey123") {
-        document.getElementById("loginBox").style.display = "none";
-        document.getElementById("dashboard").style.display = "block";
-        renderAdminProducts();
-      } else {
-        alert("Wrong password.");
+      if (data.session) {
+        currentUser = data.session.user;
+        showDashboard();
       }
     }
 
-    function addProduct() {
+    async function loginAdmin() {
+      const email = document.getElementById("adminEmail").value.trim();
+      const password = document.getElementById("adminPassword").value;
+
+      if (!email || !password) {
+        alert("Please enter email and password.");
+        return;
+      }
+
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        console.error(error);
+        alert("Login failed. Check email and password.");
+        return;
+      }
+
+      currentUser = data.user;
+      showDashboard();
+    }
+
+    async function logoutAdmin() {
+      await supabaseClient.auth.signOut();
+      currentUser = null;
+
+      document.getElementById("loginBox").style.display = "block";
+      document.getElementById("dashboard").style.display = "none";
+      document.getElementById("adminPassword").value = "";
+
+      alert("Logged out.");
+    }
+
+    async function showDashboard() {
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
+      document.getElementById("loggedInText").innerText =
+        `Logged in as ${currentUser.email}`;
+
+      renderAdminProducts();
+      await loadReports();
+    }
+
+    async function addProduct() {
       const product = {
-        name: document.getElementById("newName").value,
+        name: document.getElementById("newName").value.trim(),
         category: document.getElementById("newCategory").value,
-        price: document.getElementById("newPrice").value,
+        price: Number(document.getElementById("newPrice").value || 0),
         status: document.getElementById("newStatus").value,
-        image: document.getElementById("newImage").value || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=900&auto=format&fit=crop",
-        description: document.getElementById("newDescription").value || "Beautiful traditional wear from Honey's World."
+        image_url: document.getElementById("newImage").value.trim(),
+        description: document.getElementById("newDescription").value.trim() || "Beautiful traditional wear from Honey's World.",
+        is_featured: document.getElementById("newFeatured").value === "true"
       };
 
       if (!product.name || !product.price) {
@@ -1129,51 +1223,82 @@
         return;
       }
 
-      products.unshift(product);
-      saveProducts();
+      const { error } = await supabaseClient
+        .from("products")
+        .insert([product]);
 
-      renderFeaturedProducts();
-      applyShopFilters();
-      renderAdminProducts();
+      if (error) {
+        console.error(error);
+        alert("Product could not be added. Make sure you are logged in as the owner.");
+        return;
+      }
 
       document.getElementById("newName").value = "";
       document.getElementById("newPrice").value = "";
       document.getElementById("newImage").value = "";
       document.getElementById("newDescription").value = "";
+      document.getElementById("newFeatured").value = "false";
 
-      alert("Product added.");
+      await loadProducts();
+      renderAdminProducts();
+
+      alert("Product added successfully.");
     }
 
     function renderAdminProducts() {
       const adminProducts = document.getElementById("adminProducts");
       adminProducts.innerHTML = "";
 
-      products.forEach((product, index) => {
+      if (products.length === 0) {
+        adminProducts.innerHTML = "<p>No products yet.</p>";
+        return;
+      }
+
+      products.forEach((product) => {
         const row = document.createElement("div");
         row.className = "admin-product";
 
         row.innerHTML = `
-          <img src="${product.image}" alt="${product.name}">
+          <div class="admin-product-top">
+            <img src="${escapeHTML(getImage(product))}" alt="${escapeHTML(product.name)}">
 
-          <div>
-            <b>${product.name}</b>
-            <p style="color:#6c5647; margin-top:4px;">${product.category}</p>
+            <div>
+              <b>${escapeHTML(product.name)}</b>
+              <p style="color:#6c5647; margin-top:4px;">${escapeHTML(product.category)}</p>
+            </div>
           </div>
 
-          <input type="number" value="${product.price}" onchange="updatePrice(${index}, this.value)">
+          <input id="name-${product.id}" type="text" value="${escapeHTML(product.name)}" placeholder="Product name">
 
-          <select onchange="updateStatus(${index}, this.value)">
+          <select id="category-${product.id}">
+            <option value="Adire" ${product.category === "Adire" ? "selected" : ""}>Adire</option>
+            <option value="Boubou" ${product.category === "Boubou" ? "selected" : ""}>Boubou</option>
+            <option value="Kaftan" ${product.category === "Kaftan" ? "selected" : ""}>Kaftan</option>
+            <option value="Kampala" ${product.category === "Kampala" ? "selected" : ""}>Kampala</option>
+            <option value="Custom" ${product.category === "Custom" ? "selected" : ""}>Custom</option>
+          </select>
+
+          <input id="price-${product.id}" type="number" value="${escapeHTML(product.price)}" placeholder="Price">
+
+          <select id="status-${product.id}">
             <option value="Available" ${product.status === "Available" ? "selected" : ""}>Available</option>
             <option value="Limited Stock" ${product.status === "Limited Stock" ? "selected" : ""}>Limited Stock</option>
             <option value="Sold Out" ${product.status === "Sold Out" ? "selected" : ""}>Sold Out</option>
             <option value="Custom Order" ${product.status === "Custom Order" ? "selected" : ""}>Custom Order</option>
           </select>
 
-          <button class="delete-btn" onclick="deleteProduct(${index})">Delete</button>
+          <input id="image-${product.id}" type="text" value="${escapeHTML(getImage(product))}" placeholder="Image URL">
 
-          <div class="image-url-box">
-            <input id="imageInput${index}" type="text" value="${product.image}" placeholder="Paste new image URL here">
-            <button onclick="updateImage(${index})">Change Image</button>
+          <textarea id="description-${product.id}" placeholder="Description">${escapeHTML(product.description)}</textarea>
+
+          <select id="featured-${product.id}">
+            <option value="false" ${!product.is_featured ? "selected" : ""}>Not Featured</option>
+            <option value="true" ${product.is_featured ? "selected" : ""}>Featured on Homepage</option>
+          </select>
+
+          <div class="admin-actions">
+            <button class="save-btn" onclick="updateProduct('${product.id}')">Save Changes</button>
+            <button class="delete-btn" onclick="deleteProduct('${product.id}')">Delete</button>
           </div>
         `;
 
@@ -1181,61 +1306,101 @@
       });
     }
 
-    function updatePrice(index, newPrice) {
-      products[index].price = newPrice;
-      saveProducts();
+    async function updateProduct(productId) {
+      const updatedProduct = {
+        name: document.getElementById("name-" + productId).value.trim(),
+        category: document.getElementById("category-" + productId).value,
+        price: Number(document.getElementById("price-" + productId).value || 0),
+        status: document.getElementById("status-" + productId).value,
+        image_url: document.getElementById("image-" + productId).value.trim(),
+        description: document.getElementById("description-" + productId).value.trim(),
+        is_featured: document.getElementById("featured-" + productId).value === "true"
+      };
 
-      renderFeaturedProducts();
-      applyShopFilters();
+      const { error } = await supabaseClient
+        .from("products")
+        .update(updatedProduct)
+        .eq("id", productId);
 
-      alert("Price updated.");
-    }
-
-    function updateStatus(index, newStatus) {
-      products[index].status = newStatus;
-      saveProducts();
-
-      renderFeaturedProducts();
-      applyShopFilters();
-
-      alert("Status updated.");
-    }
-
-    function updateImage(index) {
-      const newImage = document.getElementById("imageInput" + index).value;
-
-      if (!newImage) {
-        alert("Please paste an image URL.");
+      if (error) {
+        console.error(error);
+        alert("Product could not be updated. Make sure you are logged in as the owner.");
         return;
       }
 
-      products[index].image = newImage;
-      saveProducts();
-
-      renderFeaturedProducts();
-      applyShopFilters();
+      await loadProducts();
       renderAdminProducts();
 
-      alert("Image updated.");
+      alert("Product updated successfully.");
     }
 
-    function deleteProduct(index) {
+    async function deleteProduct(productId) {
       const confirmDelete = confirm("Are you sure you want to delete this product?");
-
       if (!confirmDelete) return;
 
-      products.splice(index, 1);
-      saveProducts();
+      const { error } = await supabaseClient
+        .from("products")
+        .delete()
+        .eq("id", productId);
 
-      renderFeaturedProducts();
-      applyShopFilters();
+      if (error) {
+        console.error(error);
+        alert("Product could not be deleted. Make sure you are logged in as the owner.");
+        return;
+      }
+
+      await loadProducts();
       renderAdminProducts();
 
-      alert("Product deleted.");
+      alert("Product deleted successfully.");
     }
 
-    renderFeaturedProducts();
-    currentFilteredProducts = products;
+    async function loadReports() {
+      const adminReports = document.getElementById("adminReports");
+
+      const { data, error } = await supabaseClient
+        .from("customer_reports")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (error) {
+        console.error(error);
+        adminReports.innerHTML = "<p>Could not load reports. Make sure you are logged in as the owner.</p>";
+        return;
+      }
+
+      reports = data || [];
+      renderReports();
+    }
+
+    function renderReports() {
+      const adminReports = document.getElementById("adminReports");
+      adminReports.innerHTML = "";
+
+      if (reports.length === 0) {
+        adminReports.innerHTML = "<p>No customer reports yet.</p>";
+        return;
+      }
+
+      reports.forEach((report) => {
+        const item = document.createElement("div");
+        item.className = "report-item";
+
+        item.innerHTML = `
+          <b>${escapeHTML(report.customer_name)}</b>
+          <p><b>Phone:</b> ${escapeHTML(report.customer_phone || "Not provided")}</p>
+          <p><b>Email:</b> ${escapeHTML(report.customer_email || "Not provided")}</p>
+          <p><b>Message:</b> ${escapeHTML(report.message)}</p>
+          <p><b>Status:</b> ${escapeHTML(report.status)}</p>
+        `;
+
+        adminReports.appendChild(item);
+      });
+    }
+
+    loadProducts();
+    checkSession();
   </script>
 
 </body>
