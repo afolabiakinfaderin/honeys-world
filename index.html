@@ -330,6 +330,15 @@
       font-size: 15px;
     }
 
+    input[type="file"] {
+      background: #fff;
+      cursor: pointer;
+    }
+
+    label {
+      color: #4b1f0f;
+    }
+
     textarea {
       min-height: 130px;
       resize: vertical;
@@ -454,6 +463,10 @@
       padding: 20px;
     }
 
+    .admin-card h3 {
+      color: #2b160d;
+    }
+
     .admin-product {
       background: white;
       padding: 14px;
@@ -543,6 +556,14 @@
       border-radius: 12px;
       border: 1px solid #ead6c2;
       color: #6c5647;
+    }
+
+    .small-note {
+      color: #6c5647;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: -8px;
+      margin-bottom: 14px;
     }
 
     @media (max-width: 1050px) {
@@ -846,7 +867,12 @@
               <option value="Custom Order">Custom Order</option>
             </select>
 
-            <input id="newImage" type="text" placeholder="Image URL">
+            <label style="font-weight:bold; display:block; margin-bottom:8px;">Upload Product Image</label>
+            <input id="newImageFile" type="file" accept="image/*">
+            <p class="small-note">Choose an image from your phone/laptop. Keep image below 5MB.</p>
+
+            <input id="newImage" type="text" placeholder="Or paste image URL instead">
+
             <textarea id="newDescription" placeholder="Product description"></textarea>
 
             <select id="newFeatured">
@@ -860,7 +886,7 @@
           <div class="admin-card">
             <h3>Manage Products</h3>
             <p style="color:#6c5647; margin-top:6px; line-height:1.6;">
-              Change price, status, image URL, featured status, or delete a product.
+              Change product name, price, status, image, featured status, or delete a product.
             </p>
             <br>
             <div id="adminProducts"></div>
@@ -911,6 +937,35 @@
 
     function getImage(product) {
       return product.image_url || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=900&auto=format&fit=crop";
+    }
+
+    async function uploadImageFile(file) {
+      if (!file) return "";
+
+      if (!file.type.startsWith("image/")) {
+        throw new Error("Please upload an image file.");
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("Image is too large. Please upload an image below 5MB.");
+      }
+
+      const fileExtension = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExtension}`;
+
+      const { error } = await supabaseClient.storage
+        .from("product-images")
+        .upload(fileName, file);
+
+      if (error) {
+        throw error;
+      }
+
+      const { data } = supabaseClient.storage
+        .from("product-images")
+        .getPublicUrl(fileName);
+
+      return data.publicUrl;
     }
 
     async function loadProducts() {
@@ -1208,41 +1263,54 @@
     }
 
     async function addProduct() {
-      const product = {
-        name: document.getElementById("newName").value.trim(),
-        category: document.getElementById("newCategory").value,
-        price: Number(document.getElementById("newPrice").value || 0),
-        status: document.getElementById("newStatus").value,
-        image_url: document.getElementById("newImage").value.trim(),
-        description: document.getElementById("newDescription").value.trim() || "Beautiful traditional wear from Honey's World.",
-        is_featured: document.getElementById("newFeatured").value === "true"
-      };
+      try {
+        let imageUrl = document.getElementById("newImage").value.trim();
+        const imageFile = document.getElementById("newImageFile").files[0];
 
-      if (!product.name || !product.price) {
-        alert("Please add product name and price.");
-        return;
-      }
+        if (imageFile) {
+          imageUrl = await uploadImageFile(imageFile);
+        }
 
-      const { error } = await supabaseClient
-        .from("products")
-        .insert([product]);
+        const product = {
+          name: document.getElementById("newName").value.trim(),
+          category: document.getElementById("newCategory").value,
+          price: Number(document.getElementById("newPrice").value || 0),
+          status: document.getElementById("newStatus").value,
+          image_url: imageUrl,
+          description: document.getElementById("newDescription").value.trim() || "Beautiful traditional wear from Honey's World.",
+          is_featured: document.getElementById("newFeatured").value === "true"
+        };
 
-      if (error) {
+        if (!product.name || !product.price) {
+          alert("Please add product name and price.");
+          return;
+        }
+
+        const { error } = await supabaseClient
+          .from("products")
+          .insert([product]);
+
+        if (error) {
+          console.error(error);
+          alert("Product could not be added. Make sure you are logged in as the owner.");
+          return;
+        }
+
+        document.getElementById("newName").value = "";
+        document.getElementById("newPrice").value = "";
+        document.getElementById("newImage").value = "";
+        document.getElementById("newImageFile").value = "";
+        document.getElementById("newDescription").value = "";
+        document.getElementById("newFeatured").value = "false";
+
+        await loadProducts();
+        renderAdminProducts();
+
+        alert("Product added successfully.");
+      } catch (error) {
         console.error(error);
-        alert("Product could not be added. Make sure you are logged in as the owner.");
-        return;
+        alert(error.message || "Image upload failed. Please try again.");
       }
-
-      document.getElementById("newName").value = "";
-      document.getElementById("newPrice").value = "";
-      document.getElementById("newImage").value = "";
-      document.getElementById("newDescription").value = "";
-      document.getElementById("newFeatured").value = "false";
-
-      await loadProducts();
-      renderAdminProducts();
-
-      alert("Product added successfully.");
     }
 
     function renderAdminProducts() {
@@ -1289,6 +1357,10 @@
 
           <input id="image-${product.id}" type="text" value="${escapeHTML(getImage(product))}" placeholder="Image URL">
 
+          <label style="font-weight:bold; display:block; margin-bottom:6px;">Change Product Image</label>
+          <input id="file-${product.id}" type="file" accept="image/*">
+          <p class="small-note">Choose a new image only if you want to replace the current one.</p>
+
           <textarea id="description-${product.id}" placeholder="Description">${escapeHTML(product.description)}</textarea>
 
           <select id="featured-${product.id}">
@@ -1307,31 +1379,43 @@
     }
 
     async function updateProduct(productId) {
-      const updatedProduct = {
-        name: document.getElementById("name-" + productId).value.trim(),
-        category: document.getElementById("category-" + productId).value,
-        price: Number(document.getElementById("price-" + productId).value || 0),
-        status: document.getElementById("status-" + productId).value,
-        image_url: document.getElementById("image-" + productId).value.trim(),
-        description: document.getElementById("description-" + productId).value.trim(),
-        is_featured: document.getElementById("featured-" + productId).value === "true"
-      };
+      try {
+        let imageUrl = document.getElementById("image-" + productId).value.trim();
+        const imageFile = document.getElementById("file-" + productId).files[0];
 
-      const { error } = await supabaseClient
-        .from("products")
-        .update(updatedProduct)
-        .eq("id", productId);
+        if (imageFile) {
+          imageUrl = await uploadImageFile(imageFile);
+        }
 
-      if (error) {
+        const updatedProduct = {
+          name: document.getElementById("name-" + productId).value.trim(),
+          category: document.getElementById("category-" + productId).value,
+          price: Number(document.getElementById("price-" + productId).value || 0),
+          status: document.getElementById("status-" + productId).value,
+          image_url: imageUrl,
+          description: document.getElementById("description-" + productId).value.trim(),
+          is_featured: document.getElementById("featured-" + productId).value === "true"
+        };
+
+        const { error } = await supabaseClient
+          .from("products")
+          .update(updatedProduct)
+          .eq("id", productId);
+
+        if (error) {
+          console.error(error);
+          alert("Product could not be updated. Make sure you are logged in as the owner.");
+          return;
+        }
+
+        await loadProducts();
+        renderAdminProducts();
+
+        alert("Product updated successfully.");
+      } catch (error) {
         console.error(error);
-        alert("Product could not be updated. Make sure you are logged in as the owner.");
-        return;
+        alert(error.message || "Image upload failed. Please try again.");
       }
-
-      await loadProducts();
-      renderAdminProducts();
-
-      alert("Product updated successfully.");
     }
 
     async function deleteProduct(productId) {
