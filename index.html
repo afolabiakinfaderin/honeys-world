@@ -79,16 +79,6 @@
       text-transform: uppercase;
     }
 
-    nav button {
-      border: none;
-      background: #4b1f0f;
-      color: white;
-      padding: 12px 18px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
     .hero {
       min-height: 620px;
       display: grid;
@@ -142,6 +132,7 @@
       border-radius: 28px 28px 0 0;
       overflow: hidden;
       box-shadow: 0 20px 45px rgba(75, 31, 15, 0.22);
+      background: #ead6c2;
     }
 
     .hero-image img {
@@ -622,10 +613,6 @@
         font-size: 12px;
       }
 
-      nav button {
-        padding: 10px 13px;
-      }
-
       .hero {
         padding-top: 35px;
       }
@@ -673,7 +660,6 @@
       <a href="#featured">Featured</a>
       <a href="#about">About</a>
       <a href="#report">Report</a>
-      <button onclick="openAdmin()">Owner Login</button>
     </nav>
   </header>
 
@@ -693,7 +679,7 @@
       </div>
 
       <div class="hero-image">
-        <img src="https://images.unsplash.com/photo-1619334911925-46a94b7ce185?q=80&w=1200&auto=format&fit=crop" alt="Honey's World traditional wear">
+        <img id="heroImage" src="https://images.unsplash.com/photo-1619334911925-46a94b7ce185?q=80&w=1200&auto=format&fit=crop" alt="Honey's World traditional wear">
       </div>
     </section>
 
@@ -843,6 +829,22 @@
         <p id="loggedInText" style="color:#6c5647; margin-top:10px;"></p>
         <button class="logout-btn" onclick="logoutAdmin()">Logout</button>
 
+        <div class="admin-card" style="margin-top:25px;">
+          <h3>Website Settings</h3>
+          <p style="color:#6c5647; margin-top:6px; line-height:1.6;">
+            Change the big homepage image here.
+          </p>
+          <br>
+
+          <label style="font-weight:bold; display:block; margin-bottom:8px;">Upload Homepage Image</label>
+          <input id="heroImageFile" type="file" accept="image/*">
+          <p class="small-note">Best image: model wearing Adire/traditional wear. Keep it below 5MB.</p>
+
+          <input id="heroImageUrl" type="text" placeholder="Or paste homepage image URL instead">
+
+          <button class="btn" onclick="updateHeroImage()">Save Homepage Image</button>
+        </div>
+
         <div class="admin-grid">
           <div class="admin-card">
             <h3>Add New Product</h3>
@@ -968,6 +970,66 @@
       return data.publicUrl;
     }
 
+    async function loadSiteSettings() {
+      const { data, error } = await supabaseClient
+        .from("site_settings")
+        .select("*")
+        .eq("setting_key", "hero_image_url")
+        .single();
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      if (data && data.setting_value) {
+        document.getElementById("heroImage").src = data.setting_value;
+        document.getElementById("heroImageUrl").value = data.setting_value;
+      }
+    }
+
+    async function updateHeroImage() {
+      try {
+        let imageUrl = document.getElementById("heroImageUrl").value.trim();
+        const imageFile = document.getElementById("heroImageFile").files[0];
+
+        if (imageFile) {
+          imageUrl = await uploadImageFile(imageFile);
+        }
+
+        if (!imageUrl) {
+          alert("Please upload an image or paste image URL.");
+          return;
+        }
+
+        const { error } = await supabaseClient
+          .from("site_settings")
+          .upsert(
+            {
+              setting_key: "hero_image_url",
+              setting_value: imageUrl,
+              updated_at: new Date().toISOString()
+            },
+            { onConflict: "setting_key" }
+          );
+
+        if (error) {
+          console.error(error);
+          alert("Homepage image could not be updated. Make sure you are logged in as the owner.");
+          return;
+        }
+
+        document.getElementById("heroImage").src = imageUrl;
+        document.getElementById("heroImageUrl").value = imageUrl;
+        document.getElementById("heroImageFile").value = "";
+
+        alert("Homepage image updated successfully.");
+      } catch (error) {
+        console.error(error);
+        alert(error.message || "Image upload failed. Please try again.");
+      }
+    }
+
     async function loadProducts() {
       const { data, error } = await supabaseClient
         .from("products")
@@ -991,6 +1053,10 @@
 
       if (document.getElementById("fullShop").style.display === "block") {
         applyShopFilters();
+      }
+
+      if (document.getElementById("dashboard").style.display === "block") {
+        renderAdminProducts();
       }
     }
 
@@ -1206,6 +1272,10 @@
 
     function closeAdmin() {
       document.getElementById("adminModal").classList.remove("active");
+
+      if (window.location.hash === "#owner-login") {
+        history.replaceState(null, "", window.location.pathname);
+      }
     }
 
     async function checkSession() {
@@ -1260,6 +1330,7 @@
 
       renderAdminProducts();
       await loadReports();
+      await loadSiteSettings();
     }
 
     async function addProduct() {
@@ -1483,8 +1554,17 @@
       });
     }
 
-    loadProducts();
-    checkSession();
+    async function startWebsite() {
+      await loadSiteSettings();
+      await loadProducts();
+      await checkSession();
+
+      if (window.location.hash === "#owner-login") {
+        openAdmin();
+      }
+    }
+
+    startWebsite();
   </script>
 
 </body>
