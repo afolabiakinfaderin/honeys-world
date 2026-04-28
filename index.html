@@ -217,6 +217,7 @@
       box-shadow: 0 10px 30px rgba(75, 31, 15, 0.08);
       border: 1px solid #ead6c2;
       transition: 0.25s ease;
+      position: relative;
     }
 
     .product-card:hover {
@@ -230,6 +231,18 @@
       object-fit: cover;
       background: #ead6c2;
       cursor: pointer;
+    }
+
+    .video-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #4b1f0f;
+      color: white;
+      padding: 7px 10px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: bold;
     }
 
     .product-info {
@@ -430,14 +443,24 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 25px;
-      align-items: center;
+      align-items: start;
     }
 
-    .product-modal-grid img {
+    .product-modal-grid img,
+    .product-modal-grid video {
       width: 100%;
-      height: 540px;
+      max-height: 540px;
       object-fit: cover;
       border-radius: 16px;
+      background: #ead6c2;
+    }
+
+    .product-video-box {
+      margin-top: 15px;
+    }
+
+    .product-video-box h3 {
+      margin-bottom: 10px;
     }
 
     .admin-grid {
@@ -637,8 +660,9 @@
         grid-template-columns: 1fr;
       }
 
-      .product-modal-grid img {
-        height: 420px;
+      .product-modal-grid img,
+      .product-modal-grid video {
+        max-height: 420px;
       }
     }
 
@@ -752,10 +776,10 @@
       </div>
 
       <div class="feature">
-        <span>✨</span>
+        <span>🎥</span>
         <div>
-          <h3>Custom Styles</h3>
-          <p>Traditional outfits made for different occasions.</p>
+          <h3>Video Preview</h3>
+          <p>View product photos and videos before ordering.</p>
         </div>
       </div>
     </div>
@@ -912,11 +936,17 @@
               <option value="Custom Order">Custom Order</option>
             </select>
 
-            <label style="font-weight:bold; display:block; margin-bottom:8px;">Upload Product Image</label>
+            <label style="font-weight:bold; display:block; margin-bottom:8px;">Upload Product Picture</label>
             <input id="newImageFile" type="file" accept="image/*">
-            <p class="small-note">Choose an image from your phone/laptop. Keep image below 5MB.</p>
+            <p class="small-note">This is the picture customers see first on the product card. Keep it below 5MB.</p>
 
-            <input id="newImage" type="text" placeholder="Or paste image URL instead">
+            <input id="newImage" type="text" placeholder="Or paste picture URL instead">
+
+            <label style="font-weight:bold; display:block; margin-bottom:8px;">Upload Product Video</label>
+            <input id="newVideoFile" type="file" accept="video/*">
+            <p class="small-note">Optional. Best for showing fitting, movement, and fabric. Keep video below 30MB.</p>
+
+            <input id="newVideo" type="text" placeholder="Or paste video URL instead">
 
             <textarea id="newDescription" placeholder="Product description"></textarea>
 
@@ -931,7 +961,7 @@
           <div class="admin-card">
             <h3>Manage Products</h3>
             <p style="color:#6c5647; margin-top:6px; line-height:1.6;">
-              Change product name, price, status, image, featured status, or delete a product.
+              Change product name, price, status, picture, video, featured status, or delete a product.
             </p>
             <br>
             <div id="adminProducts"></div>
@@ -984,6 +1014,10 @@
       return product.image_url || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=900&auto=format&fit=crop";
     }
 
+    function getVideo(product) {
+      return product.video_url || "";
+    }
+
     async function uploadImageFile(file) {
       if (!file) return "";
 
@@ -1002,12 +1036,37 @@
         .from("product-images")
         .upload(fileName, file);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       const { data } = supabaseClient.storage
         .from("product-images")
+        .getPublicUrl(fileName);
+
+      return data.publicUrl;
+    }
+
+    async function uploadVideoFile(file) {
+      if (!file) return "";
+
+      if (!file.type.startsWith("video/")) {
+        throw new Error("Please upload a video file.");
+      }
+
+      if (file.size > 30 * 1024 * 1024) {
+        throw new Error("Video is too large. Please upload a video below 30MB.");
+      }
+
+      const fileExtension = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExtension}`;
+
+      const { error } = await supabaseClient.storage
+        .from("product-videos")
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      const { data } = supabaseClient.storage
+        .from("product-videos")
         .getPublicUrl(fileName);
 
       return data.publicUrl;
@@ -1107,7 +1166,10 @@
       const card = document.createElement("div");
       card.className = "product-card";
 
+      const videoBadge = getVideo(product) ? `<div class="video-badge">Video</div>` : "";
+
       card.innerHTML = `
+        ${videoBadge}
         <img src="${escapeHTML(getImage(product))}" alt="${escapeHTML(product.name)}" onclick="viewProduct('${product.id}')">
         <div class="product-info">
           <small>${escapeHTML(product.category)}</small>
@@ -1219,9 +1281,29 @@
       const product = findProduct(productId);
       if (!product) return;
 
+      const videoUrl = getVideo(product);
+      const videoBlock = videoUrl
+        ? `
+          <div class="product-video-box">
+            <h3>Product Video</h3>
+            <video controls playsinline preload="metadata">
+              <source src="${escapeHTML(videoUrl)}">
+              Your browser does not support video.
+            </video>
+          </div>
+        `
+        : `
+          <p style="margin-top:15px; color:#6c5647;">
+            No product video uploaded yet.
+          </p>
+        `;
+
       document.getElementById("productDetails").innerHTML = `
         <div class="product-modal-grid">
-          <img src="${escapeHTML(getImage(product))}" alt="${escapeHTML(product.name)}">
+          <div>
+            <img src="${escapeHTML(getImage(product))}" alt="${escapeHTML(product.name)}">
+            ${videoBlock}
+          </div>
 
           <div>
             <small style="color:#9b6a42; font-weight:bold;">${escapeHTML(product.category)}</small>
@@ -1379,10 +1461,17 @@
     async function addProduct() {
       try {
         let imageUrl = document.getElementById("newImage").value.trim();
+        let videoUrl = document.getElementById("newVideo").value.trim();
+
         const imageFile = document.getElementById("newImageFile").files[0];
+        const videoFile = document.getElementById("newVideoFile").files[0];
 
         if (imageFile) {
           imageUrl = await uploadImageFile(imageFile);
+        }
+
+        if (videoFile) {
+          videoUrl = await uploadVideoFile(videoFile);
         }
 
         const product = {
@@ -1391,6 +1480,7 @@
           price: Number(document.getElementById("newPrice").value || 0),
           status: document.getElementById("newStatus").value,
           image_url: imageUrl,
+          video_url: videoUrl,
           description: document.getElementById("newDescription").value.trim() || "Beautiful traditional wear from Honey's World.",
           is_featured: document.getElementById("newFeatured").value === "true"
         };
@@ -1414,6 +1504,8 @@
         document.getElementById("newPrice").value = "";
         document.getElementById("newImage").value = "";
         document.getElementById("newImageFile").value = "";
+        document.getElementById("newVideo").value = "";
+        document.getElementById("newVideoFile").value = "";
         document.getElementById("newDescription").value = "";
         document.getElementById("newFeatured").value = "false";
 
@@ -1423,7 +1515,7 @@
         alert("Product added successfully.");
       } catch (error) {
         console.error(error);
-        alert(error.message || "Image upload failed. Please try again.");
+        alert(error.message || "Upload failed. Please try again.");
       }
     }
 
@@ -1447,6 +1539,7 @@
             <div>
               <b>${escapeHTML(product.name)}</b>
               <p style="color:#6c5647; margin-top:4px;">${escapeHTML(product.category)}</p>
+              <p style="color:#6c5647; margin-top:4px;">${getVideo(product) ? "Video uploaded" : "No video"}</p>
             </div>
           </div>
 
@@ -1469,11 +1562,17 @@
             <option value="Custom Order" ${product.status === "Custom Order" ? "selected" : ""}>Custom Order</option>
           </select>
 
-          <input id="image-${product.id}" type="text" value="${escapeHTML(getImage(product))}" placeholder="Image URL">
+          <input id="image-${product.id}" type="text" value="${escapeHTML(getImage(product))}" placeholder="Picture URL">
 
-          <label style="font-weight:bold; display:block; margin-bottom:6px;">Change Product Image</label>
+          <label style="font-weight:bold; display:block; margin-bottom:6px;">Change Product Picture</label>
           <input id="file-${product.id}" type="file" accept="image/*">
-          <p class="small-note">Choose a new image only if you want to replace the current one.</p>
+          <p class="small-note">Choose a new picture only if you want to replace the current one.</p>
+
+          <input id="video-${product.id}" type="text" value="${escapeHTML(getVideo(product))}" placeholder="Video URL">
+
+          <label style="font-weight:bold; display:block; margin-bottom:6px;">Change Product Video</label>
+          <input id="videoFile-${product.id}" type="file" accept="video/*">
+          <p class="small-note">Choose a new video only if you want to replace the current one.</p>
 
           <textarea id="description-${product.id}" placeholder="Description">${escapeHTML(product.description)}</textarea>
 
@@ -1495,10 +1594,17 @@
     async function updateProduct(productId) {
       try {
         let imageUrl = document.getElementById("image-" + productId).value.trim();
+        let videoUrl = document.getElementById("video-" + productId).value.trim();
+
         const imageFile = document.getElementById("file-" + productId).files[0];
+        const videoFile = document.getElementById("videoFile-" + productId).files[0];
 
         if (imageFile) {
           imageUrl = await uploadImageFile(imageFile);
+        }
+
+        if (videoFile) {
+          videoUrl = await uploadVideoFile(videoFile);
         }
 
         const updatedProduct = {
@@ -1507,6 +1613,7 @@
           price: Number(document.getElementById("price-" + productId).value || 0),
           status: document.getElementById("status-" + productId).value,
           image_url: imageUrl,
+          video_url: videoUrl,
           description: document.getElementById("description-" + productId).value.trim(),
           is_featured: document.getElementById("featured-" + productId).value === "true"
         };
@@ -1528,7 +1635,7 @@
         alert("Product updated successfully.");
       } catch (error) {
         console.error(error);
-        alert(error.message || "Image upload failed. Please try again.");
+        alert(error.message || "Upload failed. Please try again.");
       }
     }
 
